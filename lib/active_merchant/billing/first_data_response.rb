@@ -109,16 +109,18 @@ module ActiveMerchant #:nodoc:
       attr_accessor :authorization, :error_code, :error_message, :success, :message
 
       def initialize params, options={}
-        success = params[:result] == 'OK'
-        message = RESPONSE_CODES[params[:result_code]]
+        @params = params.with_indifferent_access
+
+        success = @params[:result] == 'OK'
+        message = RESPONSE_CODES[@params[:result_code]]
 
         unless success
-          error_code = params[:result_code]
+          error_code = @params[:result_code]
           error_message = message
         end
 
-        super success, message, params, options.merge(
-          authorization: params[:transaction_id]
+        super success, message, @params, options.merge(
+          authorization: @params[:transaction_id]
         )
       end
 
@@ -128,12 +130,12 @@ module ActiveMerchant #:nodoc:
 
       [:recc_pmnt_expiry, :recc_pmnt_id, :result, :result_code, :transaction_id].each do |name|
         define_method name do
-          params[name]
+          @params[name]
         end
       end
 
       def _3d_secure
-        params[:'3dsecure']
+        @params[:'3dsecure']
       end
 
       def result_message
@@ -141,7 +143,7 @@ module ActiveMerchant #:nodoc:
       end
 
       def [](value)
-        params[value]
+        @params[value]
       end
     end
   end
